@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGI - Sistema de Gerenciamento Integrado</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================================== */
+        /* ESTILOS CSS - TEMA DARK INDUSTRIAL (FINAL CONSOLIDADO)     */
+        /* ========================================================== */
+        :root {
+            /* Cores de Base Industrial */
+            --cor-fundo: #151719;          /* Fundo Carvão Profundo */
+            --cor-base: #2A2E33;           /* Contêiner Cinza Chumbo */
+            --cor-painel: #3C4248;         /* Painéis e Cards */
+            --cor-texto-claro: #E0E6EB;    /* Texto Principal */
+            --cor-neutra: #7B8593;         /* Texto Secundário/Separador */
+            
+            /* Cores de Destaque e Status */
+            --cor-vermelha: #FF4444;       /* ERRO/Perigo - Vermelho Elétrico */
+            --cor-azul: #1E90FF;           /* Janela Azul */
+            --cor-preta-janela: #101010;   /* Janela Preta (Escuro Sólido) */
+            --cor-ciano: #00FFFF;          /* SUCESSO/Destaque - Ciano Neon */
+            --cor-alerta: #FFD700;         /* ALERTA/Atenção - Amarelo Ouro */
+            --cor-vazia: #4C535C;          /* Posição Vazia Estoque */
+            --cor-expedicao: #8A2BE2;      /* Módulo Expedição (Roxo Vibrante) */
+            --cor-expedicao-vazio: #3A3F44; /* Expedição Vazio */
+            --cor-verde-neon: #39FF14;     /* Verde para status EM OPERAÇÃO */
+
+            /* Borda sutil para dar profundidade */
+            --borda-fina: 1px solid rgba(123, 133, 147, 0.2); 
+        }
+
+        /* ========================================================== */
+        /* TIPOGRAFIA E LAYOUT BASE                                   */
+        /* ========================================================== */
+        body {
+            font-family: 'Roboto Mono', monospace; 
+            margin: 0;
+            padding: 20px;
+            background-color: var(--cor-fundo); 
+            color: var(--cor-texto-claro);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 25px;
+            background-color: var(--cor-base);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); 
+            border-radius: 4px;
+            border: var(--borda-fina);
+        }
+
+        h1 {
+            font-size: 2.2em;
+            text-align: center;
+            color: var(--cor-ciano);
+            margin-bottom: 25px;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5); 
+            border-bottom: 2px solid var(--cor-neutra);
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            color: var(--cor-texto-claro);
+            text-align: center;
+            margin-bottom: 15px;
+            margin-top: 30px;
+            border-bottom: 1px dashed var(--cor-neutra);
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--cor-neutra);
+            font-size: 1.1em;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        /* ========================================================== */
+        /* PAINÉIS DE DADOS E CONTROLES                               */
+        /* ===============================
+
+        <div class="dashboard-container">
+    
+    <div class="resumo-card">
+        <table class="resumo-tabela">
+            <thead>
+                <tr>
+                    <th>Status de Estoque</th>
+                    <th>Contagem</th>
+                    <th>Porcentagem</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="vermelha">Vermelha</td>
+                    <td id="count-vermelha">0</td>
+                    <td id="percent-vermelha">0%</td>
+                </tr>
+                <tr>
+                    <td class="azul">Azul</td>
+                    <td id="count-azul">0</td>
+                    <td id="percent-azul">0%</td>
+                </tr>
+                <tr>
+                    <td class="preta">Preta</td>
+                    <td id="count-preta">0</td>
+                    <td id="percent-preta">0%</td>
+                </tr>
+                <tr>
+                    <td class="vazia">VAZIA</td>
+                    <td id="count-vazia">0</td>
+                    <td id="percent-vazia">0%</td>
+                </tr>
+                <tr>
+                    <td>**TOTAL DE ESTOQUE**</td>
+                    <td colspan="2">28 Posições</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="side-panel">
+        
+        <div class="status-card oee-card">
+            <h3>📈 Indicador de Eficiência (OEE)</h3>
+            <div class="oee-line">
+                <span>**Disponibilidade (D):**</span>
+                <span id="oee-disponibilidade" class="oee-value">100.0%</span>
+            </div>
+            <div class="oee-line">
+                <span>**Performance (P):**</span>
+                <span id="oee-performance" class="oee-value">100.0%</span>
+            </div>
+            <div class="oee-line">
+                <span>**Qualidade (Q):**</span>
+                <span id="oee-qualidade" class="oee-value">100.0%</span>
+            </div>
+            <div class="oee-line oee-total">
+                <span>**OEE TOTAL:**</span>
+                <span id="oee-total-value" class="oee-value ok-oee">100.0%</span>
+            </div>
+        </div>
+        
+        <div class="status-card">
+            <h3>Estado do Módulo de Processamento (CMP)</h3>
+            <div id="processo-status-indicator" class="status-indicator status-repouso">
+                STAND-BY
+            </div>
+            <button id="toggle-status-btn" class="btn-toggle-repouso" onclick="toggleProcessoStatus()">
+                INICIAR OPERAÇÃO
+            </button>
+        </div>
+        
+        <div class="controles-card">
+            <h3>Controles de Movimentação de Estoque</h3>
+            <label for="tipo-janela">Tipo de Unidade (SKU):</label>
+            <select id="tipo-janela">
+                <option value="vermelha">Vermelha</option>
+                <option value="azul">Azul</option>
+                <option value="preta">Preta</option>
+            </select>
+
+            <button class="btn-entrada" onclick="handleMovimentacao('entrada')">
+                ➕ ENTRADA (PRODUÇÃO)
+            </button>
+            
+            <button class="btn-saida" onclick="handleMovimentacao('saida')">
+                ➖ SAÍDA (TRANSFERÊNCIA)
+            </button>
+        </div>
+    </div>
+</div>
+
+        /* ========================================================== */
+        /* GRADES (ESTOQUE E EXPEDIÇÃO)                               */
+        /* ========================================================== */
+        .janela-grid { grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .expedicao-grid { grid-template-columns: repeat(6, 1fr); gap: 8px; }
+
+        .janela-item, .expedicao-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 90px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border: 1px solid var(--cor-painel);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            color: var(--cor-texto-claro);
+        }
+
+        .janela-item:hover, .expedicao-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 10px var(--cor-ciano);
+        }
+
+        /* Cores das Unidades */
+        .vermelha { background-color: var(--cor-vermelha); border-color: var(--cor-vermelha); }
+        .azul { background-color: var(--cor-azul); border-color: var(--cor-azul); }
+        .preta { 
+            background-color: var(--cor-preta-janela); 
+            border-color: var(--cor-preta-janela); 
+            color: var(--cor-neutra); 
+        }
+        .vazia { 
+            background-color: var(--cor-vazia); 
+            color: var(--cor-neutra); 
+            border-style: dashed;
+            border-color: rgba(123, 133, 147, 0.4);
+            font-style: normal;
+        }
+
+        /* Estilos Expedição Específicos */
+        .expedicao-item { background-color: var(--cor-expedicao); border-color: var(--cor-expedicao); }
+        .expedicao-item.vazio {
+            background-color: var(--cor-expedicao-vazio); 
+            color: var(--cor-neutra);
+            border-style: dashed;
+            border-color: var(--cor-expedicao);
+        }
+        .expedicao-quantidade { font-size: 2em; }
+
+
+        /* ========================================================== */
+        /* BOTÕES E INPUTS (Controles)                                */
+        /* ========================================================== */
+        .controles-card label {
+            display: block;
+            margin-bottom: 5px;
+            margin-top: 10px;
+            color: var(--cor-neutra);
+            font-size: 0.9em;
+        }
+
+        .controles-card input, .controles-card select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            background-color: var(--cor-fundo); 
+            color: var(--cor-texto-claro);
+            border: 1px solid var(--cor-neutra);
+            box-sizing: border-box;
+        }
+
+        .controles-card button, .status-card button {
+            font-family: 'Roboto Mono', monospace; 
+            border: none;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            font-weight: bold;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            width: 100%; /* Garante que os botões dos cards laterais preencham */
+        }
+        .controles-card button:hover, .status-card button:hover {
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            opacity: 0.9;
+        }
+
+        /* Cores dos Botões */
+        .btn-entrada { background-color: var(--cor-ciano); color: var(--cor-preta-janela); }
+        .btn-saida { background-color: var(--cor-alerta); color: var(--cor-preta-janela); }
+        .btn-adicionar-expedicao { background-color: var(--cor-expedicao); color: var(--cor-texto-claro); }
+        .btn-expedir { background-color: var(--cor-vermelha); color: var(--cor-texto-claro); }
+
+        .btn-toggle-repouso { background-color: var(--cor-neutra); color: var(--cor-preta-janela); }
+        .btn-toggle-trabalhando { background-color: var(--cor-alerta); color: var(--cor-preta-janela); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🔬 Sistema de Gerenciamento Integrado (SGI)</h1>
+
+        <h2>⚡ Monitoramento Eletromecânico (TEM/PWR)</h2>
+        <div class="ambiental-dashboard">
+            <div class="ambiental-item">
+                <h4>🌡️ Temperatura</h4>
+                <span id="temp-value" class="ambiental-value ok">25.0°C</span>
+            </div>
+            <div class="ambiental-item">
+                <h4>💧 Umidade</h4>
+                <span id="umid-value" class="ambiental-value ok">60%</span>
+            </div>
+            <div class="ambiental-item">
+                <h4>⚡ Tensão (V)</h4>
+                <span id="tensao-value" class="ambiental-value ok">220.0 V</span>
+            </div>
+            <div class="ambiental-item">
+                <h4>🔌 Corrente (A)</h4>
+                <span id="corrente-value" class="ambiental-value ok">15.0 A</span>
+            </div>
+        </div>
+        
+        <div class="dashboard-container">
+            
+            <div class="resumo-card">
+                <table class="resumo-tabela">
+                    <thead>
+                        <tr>
+                            <th>Status de Estoque</th>
+                            <th>Contagem</th>
+                            <th>Porcentagem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="vermelha">Vermelha</td>
+                            <td id="count-vermelha">0</td>
+                            <td id="percent-vermelha">0%</td>
+                        </tr>
+                        <tr>
+                            <td class="azul">Azul</td>
+                            <td id="count-azul">0</td>
+                            <td id="percent-azul">0%</td>
+                        </tr>
+                        <tr>
+                            <td class="preta">Preta</td>
+                            <td id="count-preta">0</td>
+                            <td id="percent-preta">0%</td>
+                        </tr>
+                        <tr>
+                            <td class="vazia">VAZIA</td>
+                            <td id="count-vazia">0</td>
+                            <td id="percent-vazia">0%</td>
+                        </tr>
+                        <tr>
+                            <td>**TOTAL DE ESTOQUE**</td>
+                            <td colspan="2">28 Posições</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="side-panel">
+                
+                <div class="status-card">
+                    <h3>Estado do Módulo de Processamento (CMP)</h3>
+                    <div id="processo-status-indicator" class="status-indicator status-repouso">
+                        STAND-BY
+                    </div>
+                    <button id="toggle-status-btn" class="btn-toggle-repouso" onclick="toggleProcessoStatus()">
+                        INICIAR OPERAÇÃO
+                    </button>
+                </div>
+                
+                <div class="controles-card">
+                    <h3>Controles de Movimentação de Estoque</h3>
+                    <label for="tipo-janela">Tipo de Unidade (SKU):</label>
+                    <select id="tipo-janela">
+                        <option value="vermelha">Vermelha</option>
+                        <option value="azul">Azul</option>
+                        <option value="preta">Preta</option>
+                    </select>
+
+                    <button class="btn-entrada" onclick="handleMovimentacao('entrada')">
+                        ➕ ENTRADA (PRODUÇÃO)
+                    </button>
+                    
+                    <button class="btn-saida" onclick="handleMovimentacao('saida')">
+                        ➖ SAÍDA (TRANSFERÊNCIA)
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <h2>📦 Matriz de Buffer: 28 Posições (Raw Stock)</h2>
+        <div class="janela-grid" id="janela-grid">
+        </div>
+        
+        <h2>🚚 Módulo de Saída e Distribuição (Lote 12)</h2>
+        <div class="dashboard-container">
+            <div class="controles-card" style="flex: 1;">
+                <h3>Controles de Expedição Rápida</h3>
+                <label for="expedicao-posicao-rapida">Posição do Módulo (1-12):</label>
+                <input type="number" id="expedicao-posicao-rapida" min="1" max="12" value="1">
+                
+                <label for="expedicao-quantidade">Quantidade de Lote (unidades):</label>
+                <input type="number" id="expedicao-quantidade" min="1" value="1">
+
+                <button class="btn-adicionar-expedicao" onclick="adicionarProducaoExpedicaoRapida()">
+                    ✏️ LOAD: Alocar Lote
+                </button>
+                
+                <button class="btn-expedir" onclick="expedirJanelaRapida()">
+                    🚚 UNLOAD: Despachar Lote
+                </button>
+            </div>
+            
+            <div class="expedicao-grid" id="expedicao-grid" style="flex: 2;">
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        // LÓGICA JAVASCRIPT - CONSOLIDADA E APRIMORADA
+
+        const TOTAL_ESTOQUE = 28;
+        const TOTAL_EXPEDICAO = 12;
+        const GRID_ESTOQUE = document.getElementById('janela-grid');
+        const GRID_EXPEDICAO = document.getElementById('expedicao-grid');
+        const TIPOS = ['vermelha', 'azul', 'preta', 'vazia'];
+        
+        let processoStatus = 'repouso'; 
+
+        // Estado inicial do estoque (28 posições)
+        let estoque = [
+            'vermelha', 'azul', 'preta', 'vazia', 'vermelha', 'azul', 'preta',
+            'azul', 'vermelha', 'vazia', 'preta', 'azul', 'vazia', 'vermelha',
+            'preta', 'vazia', 'vermelha', 'azul', 'vazia', 'preta', 'vermelha',
+            'vermelha', 'azul', 'preta', 'vazia', 'azul', 'preta', 'vermelha'
+        ];
+        
+        // Estado inicial da Expedição (12 posições com produção ou vazias)
+        let expedicao = [
+            { quantidade: 0, tipo: 'vazio' },
+            { quantidade: 3, tipo: 'vermelha' },
+            { quantidade: 0, tipo: 'vazio' },
+            { quantidade: 1, tipo: 'preta' },
+            { quantidade: 0, tipo: 'vazio' },
+            { quantidade: 5, tipo: 'azul' },
+            { quantidade: 0, tipo: 'vazio' },
+            { quantidade: 0, tipo: 'vazio' },
+            { quantidade: 2, tipo: 'vermelha' },
+            { quantidade: 0, tipo: 'vazio' },
+            { quantidade: 0, tipo: 'vazio' },
+            { quantidade: 4, tipo: 'preta' },
+        ];
+
+
+        // 1. Inicializa o Grid Visual de Estoque e Expedição
+        function inicializarGrids() {
+            GRID_ESTOQUE.innerHTML = '';
+            for (let i = 0; i < TOTAL_ESTOQUE; i++) {
+                const tipo = estoque[i];
+                const item = document.createElement('div');
+                item.className = `janela-item ${tipo}`;
+                item.id = `estoque-posicao-${i + 1}`; 
+                item.innerHTML = tipo === 'vazia' ? 'VAZIA' : `SKU #${i + 1}`;
+                item.setAttribute('data-tipo', tipo); 
+                GRID_ESTOQUE.appendChild(item);
+            }
+
+            GRID_EXPEDICAO.innerHTML = '';
+            expedicao.forEach((item, i) => {
+                const pos = i + 1;
+                const div = document.createElement('div');
+                const isVazio = item.quantidade === 0;
+
+                div.className = `expedicao-item ${isVazio ? 'vazio' : item.tipo}`;
+                div.id = `expedicao-posicao-${pos}`;
+                div.setAttribute('data-posicao', pos);
+
+                if (isVazio) {
+                    div.innerHTML = `Posição ${pos}<br>VAZIO`;
+                } else {
+                    div.innerHTML = `Posição ${pos}: ${item.tipo.toUpperCase()}<br><span class="expedicao-quantidade">${item.quantidade} un.</span>`;
+                }
+                GRID_EXPEDICAO.appendChild(div);
+            });
+            
+            atualizarContagem(); 
+        }
+
+        // 2. Atualiza a contagem na tabela (Estoque)
+        function atualizarContagem() {
+            const itens = document.querySelectorAll('.janela-item');
+            const contagem = { vermelha: 0, azul: 0, preta: 0, vazia: 0 };
+
+            itens.forEach(item => {
+                const tipo = item.getAttribute('data-tipo');
+                if (contagem.hasOwnProperty(tipo)) {
+                    contagem[tipo]++;
+                }
+            });
+
+            TIPOS.forEach(tipo => {
+                const countElement = document.getElementById(`count-${tipo}`);
+                const percentElement = document.getElementById(`percent-${tipo}`);
+                
+                const quantidade = contagem[tipo];
+                const percentual = ((quantidade / TOTAL_ESTOQUE) * 100).toFixed(1);
+
+                if (countElement) {
+                    countElement.textContent = quantidade;
+                }
+                if (percentElement) {
+                    percentElement.textContent = `${percentual}%`;
+                }
+            });
+        }
+
+        // 3. Lógica para alternar o Status de Processo (Terminologia Técnica)
+        function toggleProcessoStatus() {
+            const indicator = document.getElementById('processo-status-indicator');
+            const button = document.getElementById('toggle-status-btn');
+
+            if (processoStatus === 'repouso') {
+                processoStatus = 'trabalhando';
+                indicator.textContent = 'EM OPERAÇÃO';
+                indicator.classList.remove('status-repouso');
+                indicator.classList.add('status-trabalhando');
+                button.textContent = 'PAUSAR / STAND-BY';
+                button.classList.remove('btn-toggle-repouso');
+                button.classList.add('btn-toggle-trabalhando');
+            } else {
+                processoStatus = 'repouso';
+                indicator.textContent = 'STAND-BY';
+                indicator.classList.remove('status-trabalhando');
+                indicator.classList.add('status-repouso');
+                button.textContent = 'INICIAR OPERAÇÃO';
+                button.classList.remove('btn-toggle-trabalhando');
+                button.classList.add('btn-toggle-repouso');
+            }
+        }
+        
+        // 4. Lógica de Movimentação de Estoque (Entrada/Saída de 1 unidade)
+        function handleMovimentacao(acao) {
+            const tipoJanela = document.getElementById('tipo-janela').value;
+            const janelas = Array.from(document.querySelectorAll('.janela-item'));
+            
+            if (acao === 'entrada') {
+                const posicaoVazia = janelas.find(j => j.getAttribute('data-tipo') === 'vazia');
+                if (posicaoVazia) {
+                    posicaoVazia.classList.remove('vazia');
+                    posicaoVazia.classList.add(tipoJanela);
+                    posicaoVazia.setAttribute('data-tipo', tipoJanela);
+                    posicaoVazia.textContent = `SKU #${posicaoVazia.id.split('-')[1]}`;
+                    alert(`✅ Entrada: Unidade ${tipoJanela.toUpperCase()} armazenada.`);
+                } else {
+                    alert('🛑 ERRO: O estoque está completamente cheio!');
+                }
+            } else if (acao === 'saida') {
+                const janelaParaRemover = janelas.find(j => j.getAttribute('data-tipo') === tipoJanela);
+                if (janelaParaRemover) {
+                    janelaParaRemover.classList.remove(tipoJanela);
+                    janelaParaRemover.classList.add('vazia');
+                    janelaParaRemover.setAttribute('data-tipo', 'vazia');
+                    janelaParaRemover.textContent = 'VAZIA';
+                    alert(`📦 Saída: Unidade ${tipoJanela.toUpperCase()} transferida.`);
+                } else {
+                    alert(`🛑 ERRO: Não há unidades do tipo ${tipoJanela.toUpperCase()} em estoque!`);
+                }
+            }
+            atualizarContagem(); 
+        }
+        
+        // 5. Função auxiliar para verificar cor de lote na Expedição
+        function getLoteBaseColor(loteIndex) {
+            // Verifica a cor em qualquer posição dentro do lote (posições 1 a 4, 5 a 8, 9 a 12)
+            for (let i = 0; i < 4; i++) {
+                const posicaoGlobal = loteIndex * 4 + i;
+                if (expedicao[posicaoGlobal] && expedicao[posicaoGlobal].quantidade > 0) {
+                    return expedicao[posicaoGlobal].tipo;
+                }
+            }
+            return 'vazio'; // O lote está totalmente vazio
+        }
+
+        // 6. ADICIONAR Produção à Expedição com Quantidade (Controle RÁPIDO)
+        function adicionarProducaoExpedicaoRapida() {
+            const posicao = parseInt(document.getElementById('expedicao-posicao-rapida').value);
+            const quantidade = parseInt(document.getElementById('expedicao-quantidade').value);
+            const posicaoIndex = posicao - 1; 
+            const tipoJanela = document.getElementById('tipo-janela').value; 
+            
+            if (posicaoIndex < 0 || posicaoIndex >= TOTAL_EXPEDICAO || quantidade <= 0) {
+                alert('Entrada inválida. Verifique a Posição (1-12) e a Quantidade (> 0).');
+                return;
+            }
+
+            // Regra de Lote (Simplificada): Apenas permite adicionar se for a mesma cor ou se o lote estiver vazio.
+            const loteIndex = Math.floor(posicaoIndex / 4);
+            // let corBaseLote = getLoteBaseColor(loteIndex); // Desabilitado para simplificar a regra
+
+            let item = expedicao[posicaoIndex];
+            
+            if (item.quantidade === 0) {
+                // Posição vazia, inicia a produção
+                item.quantidade = quantidade;
+                item.tipo = tipoJanela;
+            } else if (item.tipo === tipoJanela) {
+                // Mesma cor, adiciona a quantidade
+                item.quantidade += quantidade;
+            } else {
+                alert(`⚠️ Alerta: Posição ${posicao} já contém ${item.tipo.toUpperCase()}. Por favor, descarregue antes de alocar outro tipo.`);
+                return;
+            }
+            
+            // Atualiza o DOM
+            const div = document.getElementById(`expedicao-posicao-${posicao}`);
+            div.classList.remove('vazio', 'vermelha', 'azul', 'preta');
+            div.classList.add(item.tipo);
+            div.innerHTML = `Posição ${posicao}: ${item.tipo.toUpperCase()}<br><span class="expedicao-quantidade">${item.quantidade} un.</span>`;
+            div.setAttribute('data-tipo', item.tipo);
+
+            alert(`✅ LOAD RÁPIDO: +${quantidade} un. de ${item.tipo.toUpperCase()} adicionadas à Posição ${posicao}. Total: ${item.quantidade} un.`);
+        }
+        
+        // 7. EXPEDIR (Remover da Expedição) com Quantidade (Controle RÁPIDO)
+        function expedirJanelaRapida() {
+            const posicao = parseInt(document.getElementById('expedicao-posicao-rapida').value);
+            const posicaoIndex = posicao - 1;
+            const quantidadeRemover = parseInt(document.getElementById('expedicao-quantidade').value);
+            
+            if (posicaoIndex < 0 || posicaoIndex >= TOTAL_EXPEDICAO || quantidadeRemover <= 0) {
+                alert('Entrada inválida. Verifique a Posição (1-12) e a Quantidade (> 0).');
+                return;
+            }
+
+            let item = expedicao[posicaoIndex];
+            
+            if (item.quantidade === 0) {
+                alert('⚠️ Atenção: A posição de Expedição selecionada já está VAZIA.');
+                return;
+            }
+            
+            if (quantidadeRemover > item.quantidade) {
+                // Remove tudo que existe se a remoção for maior que o estoque
+                const totalRemovido = item.quantidade;
+                item.quantidade = 0;
+                
+                alert(`⚠️ Atenção: Apenas ${totalRemovido} un. foram removidas (Posição ${posicao} esvaziada).`);
+            } else {
+                // Lógica de Remoção
+                item.quantidade -= quantidadeRemover;
+                alert(`🚚 UNLOAD RÁPIDO: ${quantidadeRemover} un. removidas da Posição ${posicao}. Restam: ${item.quantidade} un.`);
+            }
+
+            // Atualiza o DOM
+            const div = document.getElementById(`expedicao-posicao-${posicao}`);
+
+            if (item.quantidade === 0) {
+                item.tipo = 'vazio';
+                div.classList.remove('vermelha', 'azul', 'preta');
+                div.classList.add('vazio');
+                div.innerHTML = `Posição ${posicao}<br>VAZIO`;
+                div.setAttribute('data-tipo', 'vazio');
+            } else {
+                div.innerHTML = `Posição ${posicao}: ${item.tipo.toUpperCase()}<br><span class="expedicao-quantidade">${item.quantidade} un.</span>`;
+            }
+        }
+        
+        // 8. Função para atualizar e simular Dados Ambientais
+        function atualizarDadosAmbientais() {
+            const randomValue = (min, max) => (Math.random() * (max - min) + min).toFixed(1);
+
+            // Temperatura (Normal 20-30°C, Alerta > 30°C)
+            const temp = parseFloat(randomValue(20, 35));
+            let tempClass = 'ok';
+            if (temp > 30) tempClass = 'warning';
+            if (temp > 33) tempClass = 'danger';
+            document.getElementById('temp-value').textContent = `${temp}°C`;
+            document.getElementById('temp-value').className = `ambiental-value ${tempClass}`;
+
+            // Umidade (Normal 50-70%, Perigo < 40% ou > 80%)
+            const umid = parseFloat(randomValue(35, 85));
+            let umidClass = 'ok';
+            if (umid < 45 || umid > 75) umidClass = 'warning';
+            if (umid < 40 || umid > 80) umidClass = 'danger';
+            document.getElementById('umid-value').textContent = `${umid}%`;
+            document.getElementById('umid-value').className = `ambiental-value ${umidClass}`;
+            
+            // Tensão (V) (Normal 215-225V, Perigo < 205V ou > 235V)
+            const tensao = parseFloat(randomValue(200, 240));
+            let tensaoClass = 'ok';
+            if (tensao < 210 || tensao > 230) tensaoClass = 'warning';
+            if (tensao < 205 || tensao > 235) tensaoClass = 'danger';
+            document.getElementById('tensao-value').textContent = `${tensao} V`;
+            document.getElementById('tensao-value').className = `ambiental-value ${tensaoClass}`;
+
+            // Corrente (A) (Normal 10-20A, Perigo > 25A)
+            const corrente = parseFloat(randomValue(10, 30));
+            let correnteClass = 'ok';
+            if (corrente > 20) correnteClass = 'warning';
+            if (corrente > 25) correnteClass = 'danger';
+            document.getElementById('corrente-value').textContent = `${corrente} A`;
+            document.getElementById('corrente-value').className = `ambiental-value ${correnteClass}`;
+        }
+
+
+        // Chama a função inicial ao carregar a página e inicia a simulação ambiental
+        window.onload = function() {
+            inicializarGrids();
+            // Inicia a atualização dos dados ambientais a cada 3 segundos
+            setInterval(atualizarDadosAmbientais, 3000); 
+            // Chama uma vez para preencher inicialmente
+            atualizarDadosAmbientais(); 
+        
+
+
+
+        };
+    </script>
+</body>
+</html>
+
+
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Industrial Dark</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css"> 
+</head>
+<body>
+    <div class="container">
+        <h1>SISTEMA DE GESTÃO INDUSTRIAL V3.0</h1>
+        
+        <div class="dashboard-container">
+            
+            <div class="resumo-card">
+                <h3>Resumo de Produção</h3>
+                </div>
+
+            <div class="side-panel">
+                <div class="status-card">
+                    <h3>Status Operacional</h3>
+                    <div class="status-indicator status-trabalhando">EM OPERAÇÃO</div>
+                    <button class="btn-toggle-repouso">Alternar para Repouso</button>
+                </div>
+
+                <div class="controles-card">
+                    <h3>Controles de Lote</h3>
+                    <label for="lote">Lote Atual:</label>
+                    <input type="text" id="lote" value="LOTE-A45-2025" readonly>
+                    <button class="btn-entrada">Iniciar Lote</button>
+                </div>
+            </div>
+        </div>
+        
+        <h2>Gestão de Estoque</h2>
+        <div class="janela-grid">
+            <div class="janela-item vermelha">Unid. 01</div>
+            <div class="janela-item azul">Unid. 02</div>
+            <div class="janela-item preta">Unid. 03</div>
+            <div class="janela-item vazia">Vazio</div>
+        </div>
+
+    </div>
+</body>
+</html>
